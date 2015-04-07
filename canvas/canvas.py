@@ -1,6 +1,7 @@
 import click
 import json
 import os
+import sys
 
 @click.group()
 def canvas():
@@ -9,7 +10,8 @@ def canvas():
 @canvas.command(help='Set up JSON config file')
 @click.option('--key', type=unicode, help='API Key from Canvas')
 @click.option('--name', type=unicode, help='Your name, self-explanatory')
-def config(key, name):
+@click.option('--display/--no-display', default=False, help='Display config values. Default false')
+def config(**kwargs):
 
     # check if config file exists
     # if exists, load into dict
@@ -28,10 +30,14 @@ def config(key, name):
     
     # check if options were provided
 
-    if key:
-        config['key'] = key
-    if name:
-        config['name'] = name
+    if kwargs['key']:
+        config['key'] = kwargs['key']
+    if kwargs['name']:
+        config['name'] = kwargs['name']
+
+    if kwargs['display']:
+        for k in config:
+            click.echo('{0}: {1}'.format(k, config[k]))
 
     with open(configpath, 'w') as f:
         json.dump(config,f)
@@ -42,14 +48,8 @@ def classes():
 
 @classes.command()
 def all():
-    config = {}
-    configpath = os.path.expanduser('~') + "/.canvas.json"
-    if not os.path.exists(configpath):
-        click.echo('''
-            config file not found.
-            run 'canvas config --help' for more information 
-        ''')
-
+    key = getKey()
+    
 def getKey():
     configpath = os.path.expanduser('~') + "/.canvas.json"
     if not os.path.exists(configpath):
@@ -58,14 +58,15 @@ def getKey():
             run 'canvas config --help for more information
         ''')
     config = {}
-    with open(configpath, 'r') as f:
-        config = json.load(configpath)
+    with open(configpath) as f:
+        config = json.load(f)
     if not config['key']:
         click.echo('''
             API key not set. 
             run 'canvas config --help for more information
         ''')
-        sys.exit(-1)
+        exit(-1)
+    return config['key']
 
 canvas.add_command(config)
 canvas.add_command(classes)
