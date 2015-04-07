@@ -1,9 +1,11 @@
 import click
 import json
-import requests
 import os
 import urllib3
-from tabulate import tabulate
+
+
+import classes
+import utils
 
 import urllib3.contrib.pyopenssl
 urllib3.contrib.pyopenssl.inject_into_urllib3()
@@ -21,9 +23,8 @@ def config(**kwargs):
     # check if config file exists
     # if exists, load into dict
     # if not, create empty dict with keys and dump
-    config = {}
-    configpath = os.path.expanduser('~') + "/.canvas.json"
-    if os.path.exists(configpath):
+    
+    if os.path.exists(utils.getConfigPath()):
         click.echo('Config file exists at ' + configpath)
         with open(configpath, 'r') as f:
             config = json.load(f)
@@ -47,41 +48,9 @@ def config(**kwargs):
     with open(configpath, 'w') as f:
         json.dump(config,f)
 
-@click.group()
-def classes():
-    pass
 
-@classes.command()
-def all():
-    key = getKey()
-    j = requests.get('https://canvas.instructure.com/api/v1/courses?access_token=' + key).json()
-    table = tabulate([(d['course_code'], d['name']) for d in j]) 
-    click.echo(table)  
 
-@classes.command()
-def favs():
-    key = getKey()
-    j = requests.get('https://canvas.instructure.com/api/v1/users/self/favorites/courses?access_token=' + key).json()
-    table = tabulate([d['id'], d['course_code'], d['name']] for d in j)   
-    click.echo(table)
 
-def getKey():
-    configpath = os.path.expanduser('~') + "/.canvas.json"
-    if not os.path.exists(configpath):
-        click.echo('''
-            config file not found.
-            run 'canvas config --help for more information
-        ''')
-    config = {}
-    with open(configpath) as f:
-        config = json.load(f)
-    if not config['key']:
-        click.echo('''
-            API key not set. 
-            run 'canvas config --help for more information
-        ''')
-        exit(-1)
-    return config['key']
 
 canvas.add_command(config)
-canvas.add_command(classes)
+canvas.add_command(classes.classes)
