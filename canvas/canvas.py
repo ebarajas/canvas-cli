@@ -57,7 +57,14 @@ def all():
     j = requests.get('https://canvas.instructure.com/api/v1/courses?access_token=' + key).json()
     table = tabulate([(d['course_code'], d['name']) for d in j]) 
     click.echo(table)  
-    
+
+@classes.command()
+def favs():
+    key = getKey()
+    j = requests.get('https://canvas.instructure.com/api/v1/users/self/favorites/courses?access_token=' + key).json()
+    table = tabulate([d['id'], d['course_code'], d['name']] for d in j)   
+    click.echo(table)
+
 def getKey():
     configpath = os.path.expanduser('~') + "/.canvas.json"
     if not os.path.exists(configpath):
