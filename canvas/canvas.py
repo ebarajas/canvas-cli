@@ -1,7 +1,12 @@
 import click
 import json
+import requests
 import os
-import sys
+import urllib3
+from tabulate import tabulate
+
+import urllib3.contrib.pyopenssl
+urllib3.contrib.pyopenssl.inject_into_urllib3()
 
 @click.group()
 def canvas():
@@ -49,6 +54,9 @@ def classes():
 @classes.command()
 def all():
     key = getKey()
+    j = requests.get('https://canvas.instructure.com/api/v1/courses?access_token=' + key).json()
+    table = tabulate([(d['course_code'], d['name']) for d in j]) 
+    click.echo(table)  
     
 def getKey():
     configpath = os.path.expanduser('~') + "/.canvas.json"
