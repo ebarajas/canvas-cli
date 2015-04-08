@@ -16,7 +16,8 @@ setup(
         'pyopenssl',
         'ndg-httpsclient',
         'pyasn1',
-        'tabulate'
+        'tabulate',
+        'python-dateutil'
     ],
     entry_points='''
         [console_scripts]
