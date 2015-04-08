@@ -5,6 +5,7 @@ import urllib3
 
 
 import classes
+import hw
 import utils
 
 import urllib3.contrib.pyopenssl
@@ -54,3 +55,4 @@ def config(**kwargs):
 
 canvas.add_command(config)
 canvas.add_command(classes.classes)
+canvas.add_command(hw.hw)
